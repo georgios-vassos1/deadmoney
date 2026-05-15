@@ -32,7 +32,7 @@ void Table::start_hand_impl(int dealer_button) {
     _pot.reset();
 
     for (auto& p : _players)
-        p.status = PlayerStatus::Active;
+        p.status = (p.stack > 0) ? PlayerStatus::Active : PlayerStatus::Folded;
 
     // Deal 2 hole cards to each player.
     for (auto& p : _players) {
@@ -52,9 +52,18 @@ void Table::start_hand_impl(int dealer_button) {
     _pot.contribute(bb, bb_paid);
 
     // Set up preflop betting round.
+    // Players with chips participate normally. Players who went all-in posting a blind
+    // are set_active so current_bet is initialised correctly, then immediately marked
+    // inactive (they have nothing left to bet and must not be prompted to act).
     _round.emplace(_num_seats, _big_blind);
-    for (int i = 0; i < _num_seats; ++i)
-        _round->set_active(i, _players[i].stack, _players[i].street_bet);
+    for (int i = 0; i < _num_seats; ++i) {
+        if (_players[i].stack > 0 || _players[i].street_bet > 0)
+            _round->set_active(i, _players[i].stack, _players[i].street_bet);
+    }
+    for (int i = 0; i < _num_seats; ++i) {
+        if (_players[i].street_bet > 0 && _players[i].stack == 0)
+            _round->apply(i, {Action::AllIn, 0}, _players[i].stack, _players[i].street_bet);
+    }
 }
 
 void Table::deal_community(int n) {
@@ -74,7 +83,7 @@ void Table::new_street(int first_to_act) {
     for (auto& p : _players) p.reset_street();
     _round.emplace(_num_seats, _big_blind);
     for (int i = 0; i < _num_seats; ++i)
-        if (!_players[i].is_folded())
+        if (!_players[i].is_folded() && _players[i].stack > 0)
             _round->set_active(i, _players[i].stack, 0);
     (void)first_to_act; // seat order enforced by caller calling apply in sequence
 }
