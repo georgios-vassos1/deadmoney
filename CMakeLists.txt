@@ -18,7 +18,7 @@ include(GoogleTest)
 enable_testing()
 
 # Sources accumulate as we implement components via TDD.
-add_library(holdem_core STATIC src/placeholder.cpp src/Deck.cpp src/HandEvaluator.cpp)
+add_library(holdem_core STATIC src/placeholder.cpp src/Deck.cpp src/HandEvaluator.cpp src/Player.cpp)
 target_include_directories(holdem_core PUBLIC include)
 target_compile_options(holdem_core PRIVATE -Wall -Wextra -O2)
 
@@ -32,3 +32,4 @@ endfunction()
 add_holdem_test(card_test)
 add_holdem_test(deck_test)
 add_holdem_test(hand_evaluator_test)
+add_holdem_test(player_test)
