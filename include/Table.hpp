@@ -22,10 +22,13 @@ public:
     void new_street(int first_to_act);
     std::vector<int> award_pot();
 
-    const Player&            player(int seat) const { return _players[seat]; }
-    const Pot&               pot()            const { return _pot; }
-    const std::vector<Card>& community()      const { return _community; }
-    bool                     street_over()    const;
+    const Player&            player(int seat)   const { return _players[seat]; }
+    const Pot&               pot()             const { return _pot; }
+    const std::vector<Card>& community()       const { return _community; }
+    const BettingRound&      current_round()   const { return *_round; }
+    int                      num_seats()       const { return _num_seats; }
+    int                      dealer()          const { return _dealer; }
+    bool                     street_over()     const;
 
 private:
     void start_hand_impl(int dealer_button);
