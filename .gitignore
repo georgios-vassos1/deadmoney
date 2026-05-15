@@ -37,6 +37,10 @@ qtable.bin
 # ── High score persistence ────────────────────────────────────────────────────
 snake_highscore.txt
 
+# ── Project notes (not versioned) ────────────────────────────────────────────
+STATUS.md
+FUTUREWORK.md
+
 # ── Tooling caches ────────────────────────────────────────────────────────────
 .cache/
 

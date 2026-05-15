@@ -23,8 +23,12 @@ void Session::run_street(int first_to_act) {
             if (_table.street_over()) break;
             const int seat = (first_to_act + offset) % n;
             // is_action_valid(seat, Fold) is true iff the seat is active and needs to act.
-            if (_table.current_round().is_action_valid(seat, {Action::Fold, 0}))
-                _table.apply(seat, _policies[seat]->act(seat, _table));
+            if (_table.current_round().is_action_valid(seat, {Action::Fold, 0})) {
+                BetAction action = _policies[seat]->act(seat, _table);
+                if (!_table.current_round().is_action_valid(seat, action))
+                    action = {Action::Fold, 0};
+                _table.apply(seat, action);
+            }
         }
     }
 }

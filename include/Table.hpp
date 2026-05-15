@@ -26,6 +26,7 @@ public:
     const Pot&               pot()             const { return _pot; }
     const std::vector<Card>& community()       const { return _community; }
     const BettingRound&      current_round()   const { return *_round; }
+    bool                     has_active_round() const { return _round.has_value(); }
     int                      num_seats()       const { return _num_seats; }
     int                      dealer()          const { return _dealer; }
     bool                     street_over()     const;
