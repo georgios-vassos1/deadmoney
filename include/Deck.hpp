@@ -7,6 +7,7 @@
 class Deck {
 public:
     Deck();
+    explicit Deck(std::vector<Card> preset); // preset ordering, for replay/testing
 
     Card deal();
     void shuffle();

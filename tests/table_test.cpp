@@ -111,3 +111,53 @@ TEST(TableTest, AllInPlayerWinsMainPotOnly) {
   const int total = table.player(0).stack + table.player(1).stack;
   EXPECT_EQ(total, 1008); // 1000 + 8 = 1008
 }
+
+// Preset-deck helpers: deal() pops from back, so vector must be reversed deal order.
+// For 2 players: [River, Turn, Flop3, Flop2, Flop1, P1c2, P1c1, P0c2, P0c1]
+static Deck make_royal_flush_deck_2p() {
+  return Deck(std::vector<Card>{
+    {Rank::Ten,   Suit::Spades},  // river
+    {Rank::Jack,  Suit::Spades},  // turn
+    {Rank::Queen, Suit::Spades},  // flop 3
+    {Rank::King,  Suit::Spades},  // flop 2
+    {Rank::Ace,   Suit::Spades},  // flop 1
+    {Rank::Five,  Suit::Hearts},  // P1 hole 2
+    {Rank::Four,  Suit::Hearts},  // P1 hole 1
+    {Rank::Three, Suit::Hearts},  // P0 hole 2
+    {Rank::Two,   Suit::Hearts},  // P0 hole 1
+  });
+}
+
+TEST(TableTest, TieSplitsChipsEvenly) {
+  // Board A-K-Q-J-T of spades: both players' best hand is the same royal flush.
+  // dealer=0 → SB=seat1(Bob), BB=seat0(Alice).
+  Table table(2, 5, 10);
+  table.seat_player(0, "Alice", 1000);
+  table.seat_player(1, "Bob",   1000);
+  table.start_hand(0, make_royal_flush_deck_2p());
+
+  // Preflop: SB calls, BB checks. Pot = 20.
+  table.apply(1, {Action::Call,  0});
+  table.apply(0, {Action::Check, 0});
+
+  table.new_street(0);
+  table.deal_community(3);
+  table.apply(0, {Action::Check, 0});
+  table.apply(1, {Action::Check, 0});
+
+  table.new_street(0);
+  table.deal_community(1);
+  table.apply(0, {Action::Check, 0});
+  table.apply(1, {Action::Check, 0});
+
+  table.new_street(0);
+  table.deal_community(1);
+  table.apply(0, {Action::Check, 0});
+  table.apply(1, {Action::Check, 0});
+
+  table.award_pot();
+
+  // Pot of 20 split evenly: each player recovers their 10 investment.
+  EXPECT_EQ(table.player(0).stack, 1000); // 990 + 10
+  EXPECT_EQ(table.player(1).stack, 1000); // 990 + 10
+}

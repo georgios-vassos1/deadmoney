@@ -16,6 +16,7 @@ public:
 
     void seat_player(int seat, std::string name, int stack);
     void start_hand(int dealer_button);
+    void start_hand(int dealer_button, Deck preset_deck); // replay/test: uses preset, no shuffle
     void deal_community(int n);
     void apply(int seat, BetAction action);
     void new_street(int first_to_act);
@@ -27,6 +28,8 @@ public:
     bool                     street_over()    const;
 
 private:
+    void start_hand_impl(int dealer_button);
+
     int                         _num_seats;
     int                         _small_blind;
     int                         _big_blind;

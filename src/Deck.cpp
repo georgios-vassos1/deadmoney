@@ -20,7 +20,8 @@ void Deck::populate() {
             _cards.push_back({r, s});
 }
 
-Deck::Deck()     { populate(); }
+Deck::Deck()                       { populate(); }
+Deck::Deck(std::vector<Card> preset) : _cards(std::move(preset)) {}
 void Deck::reset() { populate(); }
 
 void Deck::shuffle() {

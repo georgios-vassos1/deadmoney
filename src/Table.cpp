@@ -15,10 +15,19 @@ void Table::seat_player(int seat, std::string name, int stack) {
     _players[seat].stack = stack;
 }
 
+void Table::start_hand(int dealer_button, Deck preset_deck) {
+    _deck = std::move(preset_deck);
+    start_hand_impl(dealer_button);
+}
+
 void Table::start_hand(int dealer_button) {
-    _dealer = dealer_button;
     _deck.reset();
     _deck.shuffle();
+    start_hand_impl(dealer_button);
+}
+
+void Table::start_hand_impl(int dealer_button) {
+    _dealer = dealer_button;
     _community.clear();
     _pot.reset();
 
@@ -95,28 +104,44 @@ std::vector<int> Table::award_pot() {
             continue;
         }
 
-        // Build each contender's 7-card hand.
-        int    best_seat = contenders[0];
-        HandRank best_rank = [&]{
+        // Evaluate each contender's best 7-card hand.
+        auto hand_of = [&](int seat) {
             std::vector<Card> cards(_community.begin(), _community.end());
-            const auto& hc = _players[contenders[0]].hole_cards;
-            cards.push_back(hc[0]);
-            cards.push_back(hc[1]);
+            cards.push_back(_players[seat].hole_cards[0]);
+            cards.push_back(_players[seat].hole_cards[1]);
             return HandEvaluator::evaluate(cards);
-        }();
+        };
 
+        HandRank best_rank = hand_of(contenders[0]);
         for (int i = 1; i < static_cast<int>(contenders.size()); ++i) {
-            std::vector<Card> cards(_community.begin(), _community.end());
-            const auto& hc = _players[contenders[i]].hole_cards;
-            cards.push_back(hc[0]);
-            cards.push_back(hc[1]);
-            HandRank rank = HandEvaluator::evaluate(cards);
-            if (rank > best_rank) { best_rank = rank; best_seat = contenders[i]; }
+            const HandRank rank = hand_of(contenders[i]);
+            if (rank > best_rank) best_rank = rank;
         }
 
-        _players[best_seat].stack += sp.amount;
-        if (std::find(all_winners.begin(), all_winners.end(), best_seat) == all_winners.end())
-            all_winners.push_back(best_seat);
+        // Collect all seats that share the best rank (tie split).
+        std::vector<int> winners;
+        for (const int s : contenders)
+            if (hand_of(s) == best_rank) winners.push_back(s);
+
+        const int share     = sp.amount / static_cast<int>(winners.size());
+        const int remainder = sp.amount % static_cast<int>(winners.size());
+
+        for (const int s : winners) {
+            _players[s].stack += share;
+            if (std::find(all_winners.begin(), all_winners.end(), s) == all_winners.end())
+                all_winners.push_back(s);
+        }
+
+        // Remainder chip goes to the first seat left of dealer among the winners.
+        if (remainder > 0) {
+            for (int offset = 1; offset <= _num_seats; ++offset) {
+                const int s = (_dealer + offset) % _num_seats;
+                if (std::find(winners.begin(), winners.end(), s) != winners.end()) {
+                    _players[s].stack += remainder;
+                    break;
+                }
+            }
+        }
     }
 
     return all_winners;
