@@ -1,4 +1,4 @@
-# myHoldem
+# Dead Money
 
 A Texas Hold'em engine written in C++17, developed strictly by TDD. Every production line is covered by a failing test written before the code existed.
 
