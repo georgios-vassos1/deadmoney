@@ -128,6 +128,54 @@ static Deck make_royal_flush_deck_2p() {
   });
 }
 
+TEST(TableTest, AllInPlayerExcludedFromNewStreet) {
+  // Regression: all-in player must NOT appear in the postflop BettingRound.
+  // The old bug set them as active with needs_to_act=true, causing a fold-via-EOF.
+  // dealer=0 → SB=seat1, BB=seat0.
+  // Bob has more chips so he still has a stack after calling Alice's all-in.
+  Table table(2, 5, 10);
+  table.seat_player(0, "Alice", 200);
+  table.seat_player(1, "Bob",   400);
+  table.start_hand(0);
+
+  // Preflop: SB calls, BB raises all-in, SB calls.
+  table.apply(1, {Action::Call,  0});
+  table.apply(0, {Action::AllIn, 0}); // Alice all-in: stack → 0
+  table.apply(1, {Action::Call,  0}); // Bob calls; Bob still has chips remaining
+
+  table.deal_community(3);
+  table.new_street(1);
+
+  EXPECT_FALSE(table.current_round().is_action_valid(0, {Action::Fold, 0})); // Alice: excluded
+  EXPECT_TRUE( table.current_round().is_action_valid(1, {Action::Fold, 0})); // Bob: still active
+}
+
+TEST(TableTest, BustedPlayerExcludedFromPreflop) {
+  // Regression: a player with stack=0 at hand start must not enter the BettingRound.
+  // The old bug reset all players to Active and called set_active unconditionally.
+  // dealer=1 → SB=seat0 (0 chips), BB=seat1.
+  Table table(2, 5, 10);
+  table.seat_player(0, "Bust", 0);
+  table.seat_player(1, "Rich", 1000);
+  table.start_hand(1);
+
+  EXPECT_FALSE(table.current_round().is_action_valid(0, {Action::Fold, 0})); // Bust: excluded
+  EXPECT_TRUE( table.current_round().is_action_valid(1, {Action::Fold, 0})); // Rich: active
+}
+
+TEST(TableTest, PartialBlindAllInNotPromptedPreflop) {
+  // Regression: a short-stack player whose entire stack is consumed posting a blind
+  // must not appear in the BettingRound with needs_to_act=true.
+  // dealer=1 → SB=seat0 (3 chips, posts 3 and is all-in), BB=seat1.
+  Table table(2, 5, 10);
+  table.seat_player(0, "Short", 3);
+  table.seat_player(1, "Deep",  1000);
+  table.start_hand(1);
+
+  EXPECT_FALSE(table.current_round().is_action_valid(0, {Action::Fold, 0})); // Short: excluded
+  EXPECT_TRUE( table.current_round().is_action_valid(1, {Action::Fold, 0})); // Deep: active
+}
+
 TEST(TableTest, TieSplitsChipsEvenly) {
   // Board A-K-Q-J-T of spades: both players' best hand is the same royal flush.
   // dealer=0 → SB=seat1(Bob), BB=seat0(Alice).
