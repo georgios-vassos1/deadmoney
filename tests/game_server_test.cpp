@@ -61,3 +61,11 @@ TEST(GameServerTest, PushActionOnBotSeatThrows) {
     ASSERT_TRUE(wait_for([&]{ return server.current_state() != nullptr; }));
     server.push_action(0, {Action::Fold, 0});
 }
+
+TEST(GameServerTest, PushActionOnOutOfRangeSeatThrows) {
+    GameServer server(2, 1000, 5, 10, {0}, 1);
+    EXPECT_THROW(server.push_action(5, {Action::Fold, 0}), std::invalid_argument);
+    EXPECT_THROW(server.push_action(-1, {Action::Fold, 0}), std::invalid_argument);
+    ASSERT_TRUE(wait_for([&]{ return server.current_state() != nullptr; }));
+    server.push_action(0, {Action::Fold, 0});
+}

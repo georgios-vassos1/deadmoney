@@ -64,6 +64,7 @@ json HoldemServer::state_json(const Table& table) {
 json HoldemServer::state_json_or_done(const GameServer& gs) {
     const Table* t = gs.current_state();
     json j = t ? state_json(*t) : json::object();
+    j["num_seats"]    = gs.num_seats();
     j["hands_played"] = gs.hands_played();
     j["done"]         = gs.is_done();
     return j;

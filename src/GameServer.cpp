@@ -6,6 +6,7 @@
 
 GameServer::GameServer(int num_seats, int stack, int small_blind, int big_blind,
                        std::vector<int> human_seats, int max_hands)
+    : _num_seats(num_seats)
 {
     Table table(num_seats, small_blind, big_blind);
     for (int i = 0; i < num_seats; ++i)
@@ -41,8 +42,15 @@ GameServer::~GameServer() {
 }
 
 void GameServer::push_action(int seat, BetAction action) {
+    if (seat < 0 || seat >= _num_seats)
+        throw std::invalid_argument("seat out of range");
     if (!_http_policies[seat])
         throw std::invalid_argument("seat is not a human seat");
+
+    const Table* t = _http_policies[seat]->last_table_state();
+    if (t && t->has_active_round() && !t->current_round().is_action_valid(seat, action))
+        throw std::invalid_argument("invalid action for current game state");
+
     _http_policies[seat]->push_action(action);
 }
 

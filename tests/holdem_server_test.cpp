@@ -121,3 +121,40 @@ TEST_F(HoldemServerTest, InvalidActionStringReturns400) {
     ASSERT_NE(res, nullptr);
     EXPECT_EQ(res->status, 400);
 }
+
+TEST_F(HoldemServerTest, DoneStateIncludesNumSeats) {
+    auto c = client();
+    const std::string id = create_game(c, 0, 1);
+
+    for (int i = 0; i < 100; ++i) {
+        const auto s = json::parse(c.Get("/game/" + id + "/state")->body);
+        if (s.contains("players")) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    const json act = {{"seat", 0}, {"action", "fold"}, {"amount", 0}};
+    c.Post("/game/" + id + "/action", act.dump(), "application/json");
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+    const auto res = c.Get("/game/" + id + "/state");
+    ASSERT_NE(res, nullptr);
+    const auto done_state = json::parse(res->body);
+    EXPECT_TRUE(done_state.value("done", false));
+    EXPECT_EQ(done_state.value("num_seats", 0), 2);
+}
+
+TEST_F(HoldemServerTest, InvalidRaiseAmountReturns400) {
+    auto c = client();
+    const std::string id = create_game(c, 0, 1);
+
+    for (int i = 0; i < 100; ++i) {
+        const auto s = json::parse(c.Get("/game/" + id + "/state")->body);
+        if (s.contains("players")) break;
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    }
+
+    const json action = {{"seat", 0}, {"action", "raise"}, {"amount", 0}};
+    const auto res = c.Post("/game/" + id + "/action", action.dump(), "application/json");
+    ASSERT_NE(res, nullptr);
+    EXPECT_EQ(res->status, 400);
+}

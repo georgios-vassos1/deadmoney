@@ -19,8 +19,10 @@ public:
     const Table*  current_state() const;
     int           hands_played() const;
     bool          is_done() const;
+    int           num_seats() const { return _num_seats; }
 
 private:
+    int                                      _num_seats;
     std::vector<std::shared_ptr<HttpPolicy>> _http_policies; // indexed by seat, null for bots
     std::unique_ptr<Session>                 _session;
     std::thread                              _thread;
