@@ -56,6 +56,22 @@ TEST(HttpPolicyTest, ActCapturesTableStateSnapshot) {
     fut.get();
 }
 
+TEST(HttpPolicyTest, ShutdownUnblocksActWithFold) {
+    const auto table = make_table();
+    HttpPolicy policy;
+
+    auto fut = std::async(std::launch::async, [&]() {
+        return policy.act(0, table);
+    });
+
+    ASSERT_EQ(fut.wait_for(std::chrono::milliseconds(50)), std::future_status::timeout);
+
+    policy.shutdown();
+
+    ASSERT_EQ(fut.wait_for(std::chrono::milliseconds(200)), std::future_status::ready);
+    EXPECT_EQ(fut.get().action, Action::Fold);
+}
+
 TEST(HttpPolicyTest, ActRearmsAfterEachPush) {
     const auto table = make_table();
     HttpPolicy policy;

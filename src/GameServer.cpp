@@ -34,6 +34,8 @@ GameServer::GameServer(int num_seats, int stack, int small_blind, int big_blind,
 }
 
 GameServer::~GameServer() {
+    for (auto& hp : _http_policies)
+        if (hp) hp->shutdown();
     if (_thread.joinable())
         _thread.join();
 }

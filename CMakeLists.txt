@@ -18,7 +18,7 @@ include(GoogleTest)
 enable_testing()
 
 # Sources accumulate as we implement components via TDD.
-add_library(holdem_core STATIC src/placeholder.cpp src/Deck.cpp src/HandEvaluator.cpp src/Player.cpp src/Pot.cpp src/BettingRound.cpp src/Table.cpp src/Session.cpp src/HumanPolicy.cpp src/SimplePolicy.cpp src/BoardPrinter.cpp src/HttpPolicy.cpp src/GameServer.cpp)
+add_library(holdem_core STATIC src/placeholder.cpp src/Deck.cpp src/HandEvaluator.cpp src/Player.cpp src/Pot.cpp src/BettingRound.cpp src/Table.cpp src/Session.cpp src/HumanPolicy.cpp src/SimplePolicy.cpp src/BoardPrinter.cpp src/HttpPolicy.cpp src/GameServer.cpp src/HoldemServer.cpp)
 target_include_directories(holdem_core PUBLIC include)
 target_compile_options(holdem_core PRIVATE -Wall -Wextra -O2)
 
@@ -41,7 +41,12 @@ add_holdem_test(human_policy_test)
 add_holdem_test(board_printer_test)
 add_holdem_test(http_policy_test)
 add_holdem_test(game_server_test)
+add_holdem_test(holdem_server_test)
 
 add_executable(holdem_cli src/main.cpp)
 target_link_libraries(holdem_cli PRIVATE holdem_core)
 target_compile_options(holdem_cli PRIVATE -Wall -Wextra -O2)
+
+add_executable(holdem_server src/server_main.cpp)
+target_link_libraries(holdem_server PRIVATE holdem_core)
+target_compile_options(holdem_server PRIVATE -Wall -Wextra -O2)

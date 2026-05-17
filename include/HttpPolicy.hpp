@@ -13,6 +13,7 @@ public:
 
     BetAction     act(int seat, const Table& table) override;
     void          push_action(BetAction action);
+    void          shutdown();
     const Table*  last_table_state() const;
 
 private:
@@ -20,4 +21,5 @@ private:
     std::future<BetAction>  _future;
     std::optional<Table>    _last_table;
     std::atomic<bool>       _is_waiting{false};
+    std::atomic<bool>       _shutdown{false};
 };
