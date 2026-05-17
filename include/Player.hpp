@@ -6,6 +6,8 @@
 
 enum class PlayerStatus { Active, Folded, AllIn };
 
+const char* to_string(PlayerStatus s);
+
 struct Player {
     std::string         name;
     int                 stack      = 0;

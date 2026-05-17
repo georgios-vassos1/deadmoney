@@ -2,6 +2,14 @@
 
 #include <gtest/gtest.h>
 
+#include <string>
+
+TEST(PlayerStatusStringTest, ToStringReturnsCanonicalNames) {
+    EXPECT_EQ(to_string(PlayerStatus::Active), "active");
+    EXPECT_EQ(to_string(PlayerStatus::Folded), "folded");
+    EXPECT_EQ(to_string(PlayerStatus::AllIn),  "allin");
+}
+
 TEST(PlayerTest, PostDeductsFromStackAndSetsStreetBet) {
   Player p{"Alice", 1000};
   p.post(100);

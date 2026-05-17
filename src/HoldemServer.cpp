@@ -49,7 +49,7 @@ json HoldemServer::state_json(const Table& table) {
             {"seat",       i},
             {"stack",      p.stack},
             {"street_bet", p.street_bet},
-            {"status",     static_cast<int>(p.status)}
+            {"status",     to_string(p.status)}
         });
     }
     return {
@@ -74,9 +74,11 @@ void HoldemServer::register_routes() {
         try { body = json::parse(req.body); }
         catch (...) { res.status = 400; return; }
 
-        const int num_seats   = body.value("num_seats",  2);
-        const int stack       = body.value("stack",   1000);
-        const int max_hands   = body.value("max_hands", 10);
+        const int num_seats   = body.value("num_seats",    2);
+        const int stack       = body.value("stack",     1000);
+        const int small_blind = body.value("small_blind",  5);
+        const int big_blind   = body.value("big_blind",   10);
+        const int max_hands   = body.value("max_hands",   10);
         std::vector<int> human_seats;
         if (body.contains("human_seats"))
             for (auto& s : body["human_seats"]) human_seats.push_back(s.get<int>());
@@ -84,7 +86,7 @@ void HoldemServer::register_routes() {
         const std::string id = new_game_id();
         {
             std::lock_guard<std::mutex> lock(_mu);
-            _games[id] = std::make_unique<GameServer>(num_seats, stack, 5, 10, human_seats, max_hands);
+            _games[id] = std::make_unique<GameServer>(num_seats, stack, small_blind, big_blind, human_seats, max_hands);
         }
         res.set_content(json{{"game_id", id}}.dump(), "application/json");
     });

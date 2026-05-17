@@ -1,5 +1,15 @@
 #include "Player.hpp"
+
 #include <algorithm>
+
+const char* to_string(PlayerStatus s) {
+    switch (s) {
+    case PlayerStatus::Active: return "active";
+    case PlayerStatus::Folded: return "folded";
+    case PlayerStatus::AllIn:  return "allin";
+    }
+    return "unknown";
+}
 
 int Player::post(int amount) {
     const int actual = std::min(amount, stack);

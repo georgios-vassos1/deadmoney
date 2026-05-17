@@ -15,26 +15,23 @@ BetAction HumanPolicy::act(int seat, const Table& table) {
         std::string cmd;
         ss >> cmd;
 
-        BetAction action{Action::Fold, 0};
-        bool recognised = false;
-        if (cmd == "fold")  { action = {Action::Fold,  0}; recognised = true; }
-        if (cmd == "check") { action = {Action::Check, 0}; recognised = true; }
-        if (cmd == "call")  { action = {Action::Call,  0}; recognised = true; }
-        if (cmd == "allin") { action = {Action::AllIn, 0}; recognised = true; }
-        if (cmd == "raise") {
-            int amount = 0;
-            ss >> amount;
-            action = {Action::Raise, amount};
-            recognised = true;
+        Action action;
+        try {
+            action = action_from_string(cmd);
+        } catch (const std::invalid_argument&) {
+            continue;
         }
-        if (!recognised) continue;
 
-        if (!table.has_active_round() || table.current_round().is_action_valid(seat, action))
-            return action;
+        int amount = 0;
+        if (action == Action::Raise)
+            ss >> amount;
 
-        // Print hint only when stdin is a terminal (i.e. interactive session).
+        BetAction bet{action, amount};
+        if (!table.has_active_round() || table.current_round().is_action_valid(seat, bet))
+            return bet;
+
         if (&_input == &std::cin)
             std::cout << "Invalid action — try: fold / check / call / raise N / allin\n";
     }
-    return {Action::Fold, 0}; // EOF — fold is the safe default
+    return {Action::Fold, 0};
 }
