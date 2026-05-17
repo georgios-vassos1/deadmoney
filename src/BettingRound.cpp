@@ -1,5 +1,27 @@
 #include "BettingRound.hpp"
+
 #include <algorithm>
+#include <stdexcept>
+
+const char* to_string(Action a) {
+    switch (a) {
+    case Action::Fold:  return "fold";
+    case Action::Check: return "check";
+    case Action::Call:  return "call";
+    case Action::Raise: return "raise";
+    case Action::AllIn: return "allin";
+    }
+    return "unknown";
+}
+
+Action action_from_string(const std::string& s) {
+    if (s == "fold")  return Action::Fold;
+    if (s == "check") return Action::Check;
+    if (s == "call")  return Action::Call;
+    if (s == "raise") return Action::Raise;
+    if (s == "allin") return Action::AllIn;
+    throw std::invalid_argument("unknown action: " + s);
+}
 
 BettingRound::BettingRound(int num_seats, int big_blind_size)
     : _num_seats(num_seats)

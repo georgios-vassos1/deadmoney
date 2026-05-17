@@ -2,6 +2,29 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+#include <string>
+
+TEST(ActionStringTest, ToStringRoundTripsAllActions) {
+    EXPECT_EQ(to_string(Action::Fold),  "fold");
+    EXPECT_EQ(to_string(Action::Check), "check");
+    EXPECT_EQ(to_string(Action::Call),  "call");
+    EXPECT_EQ(to_string(Action::Raise), "raise");
+    EXPECT_EQ(to_string(Action::AllIn), "allin");
+}
+
+TEST(ActionStringTest, FromStringRoundTripsAllActions) {
+    EXPECT_EQ(action_from_string("fold"),  Action::Fold);
+    EXPECT_EQ(action_from_string("check"), Action::Check);
+    EXPECT_EQ(action_from_string("call"),  Action::Call);
+    EXPECT_EQ(action_from_string("raise"), Action::Raise);
+    EXPECT_EQ(action_from_string("allin"), Action::AllIn);
+}
+
+TEST(ActionStringTest, FromStringThrowsOnUnknown) {
+    EXPECT_THROW(action_from_string("yolo"), std::invalid_argument);
+}
+
 TEST(BettingRoundTest, CheckNotValidWhenBetOutstanding) {
   // Seat 0 posted BB of 20; seat 1 posted SB of 10.
   // Seat 1 still owes 10 — check is not valid.

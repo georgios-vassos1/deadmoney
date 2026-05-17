@@ -116,12 +116,13 @@ void HoldemServer::register_routes() {
         const int amount = body.value("amount", 0);
 
         Action action;
-        if      (act_str == "fold")  action = Action::Fold;
-        else if (act_str == "check") action = Action::Check;
-        else if (act_str == "call")  action = Action::Call;
-        else if (act_str == "raise") action = Action::Raise;
-        else if (act_str == "allin") action = Action::AllIn;
-        else { res.status = 400; res.set_content(R"({"error":"unknown action"})", "application/json"); return; }
+        try {
+            action = action_from_string(act_str);
+        } catch (const std::invalid_argument&) {
+            res.status = 400;
+            res.set_content(R"({"error":"unknown action"})", "application/json");
+            return;
+        }
 
         try {
             gs->push_action(seat, {action, amount});

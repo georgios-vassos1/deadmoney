@@ -1,8 +1,13 @@
 #pragma once
 
+#include <stdexcept>
+#include <string>
 #include <vector>
 
 enum class Action { Fold, Check, Call, Raise, AllIn };
+
+const char*  to_string(Action a);
+Action       action_from_string(const std::string& s);
 
 struct BetAction {
     Action action;
