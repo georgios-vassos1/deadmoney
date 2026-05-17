@@ -1,4 +1,5 @@
 #include "HoldemServer.hpp"
+#include "GameDefaults.hpp"
 
 #include <cstdlib>
 #include <iostream>
@@ -6,7 +7,7 @@
 #include <chrono>
 
 int main(int argc, char* argv[]) {
-    const int port = (argc > 1) ? std::atoi(argv[1]) : 8080;
+    const int port = (argc > 1) ? std::atoi(argv[1]) : GameDefaults::server_port;
 
     HoldemServer server;
     server.start(port);

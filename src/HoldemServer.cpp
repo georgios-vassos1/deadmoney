@@ -1,4 +1,5 @@
 #include "HoldemServer.hpp"
+#include "GameDefaults.hpp"
 
 #include <sstream>
 #include <iomanip>
@@ -74,11 +75,11 @@ void HoldemServer::register_routes() {
         try { body = json::parse(req.body); }
         catch (...) { res.status = 400; return; }
 
-        const int num_seats   = body.value("num_seats",    2);
-        const int stack       = body.value("stack",     1000);
-        const int small_blind = body.value("small_blind",  5);
-        const int big_blind   = body.value("big_blind",   10);
-        const int max_hands   = body.value("max_hands",   10);
+        const int num_seats   = body.value("num_seats",    GameDefaults::num_seats);
+        const int stack       = body.value("stack",       GameDefaults::stack);
+        const int small_blind = body.value("small_blind", GameDefaults::small_blind);
+        const int big_blind   = body.value("big_blind",   GameDefaults::big_blind);
+        const int max_hands   = body.value("max_hands",   GameDefaults::max_hands);
         std::vector<int> human_seats;
         if (body.contains("human_seats"))
             for (auto& s : body["human_seats"]) human_seats.push_back(s.get<int>());

@@ -42,6 +42,7 @@ add_holdem_test(board_printer_test)
 add_holdem_test(http_policy_test)
 add_holdem_test(game_server_test)
 add_holdem_test(holdem_server_test)
+add_holdem_test(game_defaults_test)
 
 add_executable(holdem_cli src/main.cpp)
 target_link_libraries(holdem_cli PRIVATE holdem_core)
