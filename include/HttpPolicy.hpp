@@ -3,6 +3,7 @@
 #include "PlayerPolicy.hpp"
 #include "Table.hpp"
 
+#include <atomic>
 #include <future>
 #include <optional>
 
@@ -18,4 +19,5 @@ private:
     std::promise<BetAction> _promise;
     std::future<BetAction>  _future;
     std::optional<Table>    _last_table;
+    std::atomic<bool>       _is_waiting{false};
 };
